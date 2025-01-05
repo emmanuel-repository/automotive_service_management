@@ -43,7 +43,7 @@ export function EditCar({ open, onClose, data, onChange, onSubmit }) {
 
             <div className="flex flex-col space-y-1.5">
               <Label htmlFor="text">Numero de Placa</Label>
-              <Input name="plateNumber" value={localFormData.plate_number}
+              <Input name="plate_number" value={localFormData.plate_number}
                 onChange={handleChange}
                 required />
             </div>

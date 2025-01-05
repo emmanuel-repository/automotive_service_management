@@ -1,10 +1,10 @@
-const carService = {
+const maintenanceService = {
 
-  async getCars() {
+  async getMaintenance(slug: string) {
 
     try {
       const dataSession = JSON.parse(localStorage.getItem('sessionData') ?? '{}');
-      const response: Response = await fetch(`${import.meta.env.VITE_API}/car`, {
+      const response: Response = await fetch(`${import.meta.env.VITE_API}/maintenance_service/${slug}`, {
         headers: {
           "Content-Type": "application/json",
           "Authorization": dataSession.token
@@ -25,10 +25,10 @@ const carService = {
     }
   },
 
-  async saveDataCar(data: any): Promise<any> {
+  async saveMaintenance(data: any): Promise<any> {
     try {
       const dataSession = JSON.parse(localStorage.getItem('sessionData') ?? '{}');
-      const response = await fetch(`${import.meta.env.VITE_API}/car`, {
+      const response = await fetch(`${import.meta.env.VITE_API}/maintenance_service`, {
         method: 'POST',
         body: JSON.stringify(data), // Pasar FormData directamente
         headers: {
@@ -47,10 +47,10 @@ const carService = {
     }
   },
 
-  async editDataCar(data: any): Promise<any> {
+  async editMaintenance(data: any): Promise<any> {
     try {
       const dataSession = JSON.parse(localStorage.getItem('sessionData') ?? '{}');
-      const response = await fetch(`${import.meta.env.VITE_API}/car/${data.slug}`, {
+      const response = await fetch(`${import.meta.env.VITE_API}/maintenance_service/${data.slug}`, {
         method: 'PUT',
         body: JSON.stringify(data), // Pasar FormData directamente
         headers: {
@@ -69,10 +69,10 @@ const carService = {
     }
   },
 
-  async deleteCar(slug: string): Promise<any> {
+  async deleteMaintenance(slug: string): Promise<any> {
     try {
       const dataSession = JSON.parse(localStorage.getItem('sessionData') ?? '{}');
-      const response = await fetch(`${import.meta.env.VITE_API}/car/${slug}`, {
+      const response = await fetch(`${import.meta.env.VITE_API}/maintenance_service/${slug}`, {
         method: 'DELETE',
         headers: {
           "Content-Type": "application/json",
@@ -91,4 +91,4 @@ const carService = {
   },
 }
 
-export default carService;
+export default maintenanceService;

@@ -10,35 +10,36 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuTrigger, } from "@/components/ui/dropdown-menu";
 import { MoreHorizontal } from "lucide-react";
-import carService from "@/core/services/CarService";
-import RegisterCar from "./RegisterCar";
-import { EditCar } from "./EditCar";
 import { successAlert, infoAlert } from "@/pages/Swal";
 import { useNavigate } from 'react-router-dom';
+import maintenanceService from "@/core/services/MaintenanceService";
+import MaintenanceRegister from "./MaintenanceRegister";
+import { useParams } from 'react-router-dom';
 
 
-export default function MainCar() {
+export default function MainService() {
 
   const [sorting, setSorting] = useState([]);
   const [columnFilters, setColumnFilters] = useState([]);
   const [columnVisibility, setColumnVisibility] = useState({});
   const [rowSelection, setRowSelection] = useState({});
   const [columns, setDataColumns] = useState([]);
-  const [data, setDataRecord] = useState([]);
+  const [data, setDataService] = useState([]);
   const [errors, setErrors] = useState([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [formEdit, setFormEdit] = useState({ plate_number: "", model: "", year: "", });
   const navigate = useNavigate();
+  const { id } = useParams();
 
   useEffect(() => {
 
     const getDataRecord = async () => {
 
-      const dataColumns = getColumns(handleEdit, handleDelete, redirect);
-      const dataResult = await carService.getCars();
+      const dataColumns = getColumns(handleEdit, handleDelete);
+      const dataResult = await maintenanceService.getMaintenance(id);
 
       setDataColumns(dataColumns)
-      setDataRecord(dataResult.cars);
+      setDataService(dataResult.maintenance_services);
     }
 
     getDataRecord();
@@ -58,67 +59,28 @@ export default function MainCar() {
     state: { sorting, columnFilters, columnVisibility, rowSelection },
   });
 
-  const closeDialog = () => {
-    setIsDialogOpen(false); // Cerrar el diálogo}
-  };
 
   const handleFormSubmit = async (data) => {
+    data["slugCar"] = id
 
-    const result = await carService.saveDataCar(data)
+    const result = await maintenanceService.saveMaintenance(data)
 
     if (result.errors) {
       setErrors(result.errors)
       return
     }
 
-    setDataRecord((prevData) => [...prevData, result.car]);
+    setDataService((prevData) => [...prevData, result.maintenance_service]);
     setErrors([])
     successAlert("Si se guardaron los dato")
   };
 
-  const handleSubmitEdit = async () => {
-
-    const result = await carService.editDataCar(formEdit)
-
-    if (result.errors) {
-      // setErrorsEdit(result.errors)
-      infoAlert(JSON.stringify(result.errors), "¡Verificar!");
-      setIsDialogOpen(false);
-      return
-    }
-
-    setDataRecord((prevData) =>
-      prevData.map((record) =>
-        record.slug === result.car.slug ? { ...record, ...result.car } : record
-      )
-    );
-
-  };
-
-  const handleFormChange = (newFormData) => {
-    setFormEdit(newFormData);
-  };
-
   const handleEdit = (data) => {
-    setIsDialogOpen(true);
-    setFormEdit(data)
+  
   }
 
   const handleDelete = async (data) => {
 
-    const result = await carService.deleteCar(data.slug)
-
-    if (result.errors) {
-      setErrors(result.errors)
-      return
-    }
-
-    setDataRecord((prevData) => prevData.filter(item => item.slug !== data.slug));
-
-  }
-
-  const redirect = (data) => {
-    navigate(`/manager/services/${data.slug}`);
   }
 
   return (
@@ -143,7 +105,7 @@ export default function MainCar() {
       <div className="flex flex-row">
 
         <div className="pt-10">
-          <RegisterCar handleSubmitCallback={handleFormSubmit} />
+          <MaintenanceRegister handleSubmitCallback={handleFormSubmit} />
         </div>
 
         <div className="pt-10 ml-4 flex-grow">
@@ -164,27 +126,21 @@ export default function MainCar() {
             </CardContent>
           </Card>
         </div>
-        
+
       </div>
 
-      <EditCar
-        open={isDialogOpen}
-        onClose={closeDialog}
-        data={formEdit} // Datos seleccionados para edición
-        onChange={handleFormChange} // Actualiza el estado del formulario
-        onSubmit={handleSubmitEdit} // Maneja el envío del formulario
-      />
+      
+
     </>
   )
-
 }
 
-function getColumns(handleEdit, handleDelete, redirect) {
+function getColumns(handleEdit, handleDelete) {
 
   const keysColums = [
-    { keyColumn: 'plate_number', description: 'Numero de Placa' },
-    { keyColumn: 'model', description: 'Modelo' },
-    { keyColumn: 'year', description: 'Año' },
+    { keyColumn: 'description', description: 'Descripcion' },
+    { keyColumn: 'date', description: 'Fecha' },
+    { keyColumn: 'status', description: 'Estatus' },
   ];
 
   const columns = keysColums.map((item) => {
@@ -203,12 +159,12 @@ function getColumns(handleEdit, handleDelete, redirect) {
     };
   });
 
-  columns.push(getColumnsAction(handleEdit, handleDelete, redirect))
+  columns.push(getColumnsAction(handleEdit, handleDelete))
 
   return columns;
 }
 
-function getColumnsAction(handleEdit, handleDelete, redirect) {
+function getColumnsAction(handleEdit, handleDelete) {
 
   return {
     id: "actions",
@@ -229,11 +185,7 @@ function getColumnsAction(handleEdit, handleDelete, redirect) {
             <DropdownMenuContent className="w-56">
 
               <DropdownMenuGroup>
-
-                <DropdownMenuItem onClick={() => { redirect(row.original) }}>
-                  <span>Mostrar Servicios</span>
-                </DropdownMenuItem>
-
+                
                 <DropdownMenuItem onClick={() => { handleEdit(row.original) }}>
                   <span>Actualizar</span>
                 </DropdownMenuItem>
