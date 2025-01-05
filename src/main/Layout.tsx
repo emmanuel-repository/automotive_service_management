@@ -9,8 +9,7 @@ export default function Layout() {
     <>
 
       <div>
-        <BackgroundVideo />
-
+      
         <Header />
 
         <Suspense>
