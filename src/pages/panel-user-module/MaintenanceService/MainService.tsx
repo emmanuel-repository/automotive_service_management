@@ -15,6 +15,7 @@ import { useNavigate } from 'react-router-dom';
 import maintenanceService from "@/core/services/MaintenanceService";
 import MaintenanceRegister from "./MaintenanceRegister";
 import { useParams } from 'react-router-dom';
+import { MaintenanceEdit } from "./MaintenanceEdit";
 
 
 export default function MainService() {
@@ -28,7 +29,6 @@ export default function MainService() {
   const [errors, setErrors] = useState([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [formEdit, setFormEdit] = useState({ plate_number: "", model: "", year: "", });
-  const navigate = useNavigate();
   const { id } = useParams();
 
   useEffect(() => {
@@ -59,6 +59,9 @@ export default function MainService() {
     state: { sorting, columnFilters, columnVisibility, rowSelection },
   });
 
+  const closeDialog = () => {
+    setIsDialogOpen(false); // Cerrar el diálogo}
+  };
 
   const handleFormSubmit = async (data) => {
     data["slugCar"] = id
@@ -75,12 +78,51 @@ export default function MainService() {
     successAlert("Si se guardaron los dato")
   };
 
+  const handleSubmitEdit = async () => {
+
+    console.log(formEdit.slug)
+
+    const result = await maintenanceService.editMaintenance(formEdit)
+
+    if (result.errors) {
+      // setErrorsEdit(result.errors)
+      infoAlert(JSON.stringify(result.errors), "¡Verificar!");
+      setIsDialogOpen(false);
+      return
+    }
+
+    setDataService((prevData) =>
+      prevData.map((record) =>
+        record.slug === result.maintenance_service.slug ? { ...record, ...result.maintenance_service } : record
+      )
+    );
+    setIsDialogOpen(false);
+
+  };
+
+  const handleFormChange = (newFormData) => {
+    setFormEdit(newFormData);
+  };
+
   const handleEdit = (data) => {
-  
+
+    const formattedDate = new Date(data.date).toISOString().split('T')[0];
+
+    data.date = formattedDate
+
+    setIsDialogOpen(true);
+    setFormEdit(data)
   }
 
   const handleDelete = async (data) => {
+    const result = await maintenanceService.deleteMaintenance(data.slug)
 
+    if (result.errors) {
+      setErrors(result.errors)
+      return
+    }
+
+    setDataService((prevData) => prevData.filter(item => item.slug !== data.slug));
   }
 
   return (
@@ -129,7 +171,13 @@ export default function MainService() {
 
       </div>
 
-      
+      <MaintenanceEdit
+        open={isDialogOpen}
+        onClose={closeDialog}
+        data={formEdit} // Datos seleccionados para edición
+        onChange={handleFormChange} // Actualiza el estado del formulario
+        onSubmit={handleSubmitEdit} // Maneja el envío del formulario
+      />
 
     </>
   )
@@ -185,7 +233,7 @@ function getColumnsAction(handleEdit, handleDelete) {
             <DropdownMenuContent className="w-56">
 
               <DropdownMenuGroup>
-                
+
                 <DropdownMenuItem onClick={() => { handleEdit(row.original) }}>
                   <span>Actualizar</span>
                 </DropdownMenuItem>

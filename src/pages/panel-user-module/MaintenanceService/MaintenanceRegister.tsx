@@ -71,7 +71,7 @@ export default function MaintenanceRegister({ handleSubmitCallback }) {
                 <Label htmlFor="text">Estatus:</Label>
                 <select name="status" value={formData.status} onChange={handleChange} required>
                   <option value="">Seleccione una opción</option>
-                  <option value="“pending">E</option>
+                  <option value="“pending">pending</option>
                   <option value="in_progress">in_progress</option>
                   <option value="completed">completed</option>
                 </select>

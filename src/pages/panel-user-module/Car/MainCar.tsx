@@ -92,7 +92,7 @@ export default function MainCar() {
         record.slug === result.car.slug ? { ...record, ...result.car } : record
       )
     );
-
+    setIsDialogOpen(false);
   };
 
   const handleFormChange = (newFormData) => {
