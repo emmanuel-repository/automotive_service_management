@@ -8,21 +8,26 @@ import { RegisterCar } from "./RegisterCar";
 import { Car } from "@/core/interfaces/car.interface";
 import { ActionsTable } from "@/core/interfaces/actionsTable.interface";
 import { EditCar } from "./EditCar";
+import { confirmationAlert, infoAlert } from "@/pages/Swal";
+import { carService } from "@/core/services/car.service";
 
 
 
 export default function MainCar() {
 
   const [dataCar, setDataCar] = useState<Car>({ model: '', year: 0, plate_number: '' });
+  const [dataCarEdit, setDataCarEdit] = useState<Car>({ model: '', year: 0, plate_number: '' });
   const [openDialog, setOpenDialog] = useState<boolean>(false);
-  const [dataCarEdit, setDataCarEdit] = useState<Car>({ model: '', year: 0, plate_number: '' })
+  const [typeAction, setTypeAction] = useState<string>('');
 
   const saveData = (data: Car) => {
     setDataCar(data);
+    setTypeAction('save');
   };
 
   const editData = (data: Car) => {
-    setDataCar(data)
+    setDataCar(data);
+    setTypeAction('edit');
   }
 
   const closeDialog = (open = true) => {
@@ -34,8 +39,26 @@ export default function MainCar() {
     setOpenDialog(true);
   }, []);
 
-  const deleteDate = useCallback((data: Car) => {
-    console.log(`Deleting data for ID: ${data}`);
+  const deleteDate = useCallback(async (data: Car) => {
+
+    const message: string = 'Se borrara el registro seleccionado, ¡No se podra revertir!'
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    confirmationAlert(message).then(async (result: any) => {
+      if (result.isConfirmed) {
+       
+        const result = await carService.deleteCar(data)
+
+        if (result.errors) {
+          infoAlert('¡Verifica!', 'No se pudo eliminar el registro.');
+          return
+        }
+
+        setTypeAction('delete');
+
+      }
+    });
+
   }, []);
 
   const redirectPage = useCallback((data: Car) => {
@@ -82,7 +105,7 @@ export default function MainCar() {
 
             <CardContent>
 
-              <ListCars dataCar={dataCar} actions={listActions} />
+              <ListCars dataCar={dataCar} actions={listActions} typeAction={typeAction}/>
 
             </CardContent>
 
@@ -110,7 +133,7 @@ export default function MainCar() {
 
           </DialogHeader>
 
-          <EditCar dataCar={dataCarEdit} handleSubmitCallback={editData} handleCloseCallback={closeDialog}/>
+          <EditCar dataCar={dataCarEdit} handleSubmitCallback={editData} handleCloseCallback={closeDialog} />
 
         </DialogContent>
       </Dialog>

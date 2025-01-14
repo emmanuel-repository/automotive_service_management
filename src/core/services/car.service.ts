@@ -73,10 +73,10 @@ export const carService = {
     }
   },
 
-  async deleteCar(slug: string): Promise<any> {
+  async deleteCar(data: Car): Promise<any> {
     try {
       const dataSession = JSON.parse(localStorage.getItem('sessionData') ?? '{}');
-      const response = await fetch(`${import.meta.env.VITE_API}/car/${slug}`, {
+      const response = await fetch(`${import.meta.env.VITE_API}/car/${data.slug}`, {
         method: 'DELETE',
         headers: {
           "Content-Type": "application/json",

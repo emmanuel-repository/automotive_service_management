@@ -13,7 +13,8 @@ import { ActionsTable } from "@/core/interfaces/actionsTable.interface";
 
 interface ListCarsProps {
   dataCar: Car;
-  actions: ActionsTable[]
+  actions: ActionsTable[];
+  typeAction: string
 }
 
 export const ListCars: React.FC<ListCarsProps> = ({ dataCar, actions }) => {
@@ -41,22 +42,32 @@ export const ListCars: React.FC<ListCarsProps> = ({ dataCar, actions }) => {
 
   // Actualiza la lista de coches cuando llega un nuevo registro
   useEffect(() => {
-    
-    setCarList(prevCarList => {
-      
-      const updatedCarList = prevCarList.map(car => 
-        car.slug === dataCar.slug ? { ...car, ...dataCar } : car
-      );
 
+    setCarList(prevCarList => {
+     
       // Si el coche no existe, agrégalo
-      if (!prevCarList.some(car => car.slug === dataCar.slug)) {
+      if (dataCar.slug && !prevCarList.some(car => car.slug === dataCar.slug)) {
         return [...prevCarList, { ...dataCar, year: Number(dataCar.year) }];
       }
 
-      return updatedCarList;
+      const updatedCarList = prevCarList.map((car: Car) => car.slug === dataCar.slug ? { ...car, ...dataCar } : car);
 
+      return updatedCarList;
     });
   }, [dataCar]);
+
+  // useEffect(() => {
+  //   if (typeAction === 'delete') {
+  //     // Refetch the data after deleting a car (you could use carService.getCars or any other method)
+  //     const fetchUpdatedData = async () => {
+  //       const result = await carService.getCars();
+  //       if (result && result.cars) {
+  //         setCarList(result.cars);
+  //       }
+  //     };
+  //     fetchUpdatedData();
+  //   }
+  // }, [typeAction]);  // Refetch when 'delete' action happens
 
   const table = useReactTable({
     data: carList,
