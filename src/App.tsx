@@ -1,7 +1,7 @@
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 import { lazy } from 'react';
 import ProtectedRoute from './ProtectedRoute';
-import Login from './pages/auth-module/Login';
+import { Login } from './pages/auth-module/Login';
 import './App.css';
 
 const Layout = lazy(() => import("./main/Layout"));
@@ -12,12 +12,12 @@ function App() {
 
   const router = createBrowserRouter([
     { path: "/", element: <Login /> },
-    { 
-      path: "manager", 
+    {
+      path: "manager",
       element: <ProtectedRoute><Layout /></ProtectedRoute>,
       children: [
         { path: "car", element: <MainCar /> },
-        { path: "services/:id", element: <MainService/> },
+        { path: "services/:id", element: <MainService /> },
       ]
     }
   ])

@@ -1,9 +1,9 @@
+import React, { useEffect, useState } from "react";
 import { CreditCard, LogOut, Settings, User } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger, } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useEffect, useState } from "react";
 
-export default function Header() {
+export const Header: React.FC = () => {
 
   const [name, setName] = useState<string>('');
   const [email, setEmail] = useState<string>('');

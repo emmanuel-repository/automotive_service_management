@@ -1,19 +1,24 @@
 
+import React from "react"
 import { flexRender } from "@tanstack/react-table"
 import { TableHead, TableHeader, TableRow } from "@/components/ui/table"
 
-export function TableHeaderCustom({ table }) {
+interface TableHeaderCustomProps {
+	table: any
+}
+
+export const TableHeaderCustom: React.FC<TableHeaderCustomProps> = ({ table }) => {
 
 	return (
 		<>
 			<TableHeader>
 				{
-					table.getHeaderGroups().map((headerGroup) => (
+					table.getHeaderGroups().map((headerGroup: any) => (
 
 						<TableRow key={headerGroup.id}>
 
 							{
-								headerGroup.headers.map((header) => {
+								headerGroup.headers.map((header: any) => {
 									return (
 
 										<TableHead key={header.id} className="text-center">

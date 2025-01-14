@@ -1,21 +1,22 @@
-import BackgroundVideo from "@/components/custom/BackgroundVideo";
-import { Suspense } from "react";
+import React, { Suspense } from "react";
 import { Outlet } from "react-router-dom";
-import Header from "./Header";
+import { Header } from "./Header";
 
-export default function Layout() {
+const Layout: React.FC = () => {
 
   return (
     <>
-
       <div>
-      
+
         <Header />
 
         <Suspense>
           <Outlet />
         </Suspense>
+        
       </div>
     </>
   )
 }
+
+export default Layout;

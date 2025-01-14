@@ -32,6 +32,7 @@ export const infoAlert = (message: string, text: string): void => {
   MySwal.fire(message, text, 'info');
 };
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const confirmationAlert = (message: string, messageConfirmation?: string): any => {
   return MySwal.fire({
     title: '¿Estás seguro?',

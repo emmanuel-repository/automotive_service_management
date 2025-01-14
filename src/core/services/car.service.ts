@@ -1,4 +1,7 @@
-const carService = {
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { Car } from "../interfaces/car.interface";
+
+export const carService = {
 
   async getCars(): Promise<any> {
 
@@ -20,12 +23,13 @@ const carService = {
       return data
 
     } catch (error) {
+
       console.log(error)
       return []
     }
   },
 
-  async saveDataCar(data: any): Promise<any> {
+  async saveDataCar(data: Car): Promise<any> {
     try {
       const dataSession = JSON.parse(localStorage.getItem('sessionData') ?? '{}');
       const response = await fetch(`${import.meta.env.VITE_API}/car`, {
@@ -37,7 +41,7 @@ const carService = {
         },
       });
 
-      const result: any = await response.json();
+      const result: unknown = await response.json();
 
       return result
 
@@ -47,7 +51,7 @@ const carService = {
     }
   },
 
-  async editDataCar(data: any): Promise<any> {
+  async editDataCar(data: Car): Promise<any> {
     try {
       const dataSession = JSON.parse(localStorage.getItem('sessionData') ?? '{}');
       const response = await fetch(`${import.meta.env.VITE_API}/car/${data.slug}`, {
@@ -59,7 +63,7 @@ const carService = {
         },
       });
 
-      const result: any = await response.json();
+      const result: unknown = await response.json();
 
       return result
 
@@ -80,7 +84,7 @@ const carService = {
         },
       });
 
-      const result: any = await response.json();
+      const result: unknown = await response.json();
 
       return result
 
@@ -91,4 +95,3 @@ const carService = {
   },
 }
 
-export default carService;

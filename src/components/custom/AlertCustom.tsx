@@ -1,7 +1,12 @@
 import { AlertCircle } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "../ui/alert";
+import React from "react";
 
-export function DangerAlert({errors}) {
+interface DangerAlertProps {
+  errors: string[]
+}
+
+export const DangerAlert: React.FC<DangerAlertProps> = ({errors}) => {
 
   return (
     <>

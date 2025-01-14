@@ -5,8 +5,13 @@ import { faChevronRight } from "@fortawesome/free-solid-svg-icons";
 import { faAnglesLeft } from "@fortawesome/free-solid-svg-icons";
 import { faAnglesRight } from "@fortawesome/free-solid-svg-icons";
 import { Button } from "../ui/button";
+import React from "react";
 
-export function PaginationTableCustom({ table }) {
+interface PaginationTableCustomProps {
+  table: any
+}
+
+export const PaginationTableCustom: React.FC<PaginationTableCustomProps> = ({ table }) => {
 
   return (
     <>

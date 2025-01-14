@@ -1,23 +1,27 @@
+import React, { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
 import { DangerAlert } from "@/components/custom/AlertCustom";
-import { useForm } from "react-hook-form";
-import carService from "@/core/services/CarService";
+import { SubmitHandler, useForm } from "react-hook-form";
 import { successAlert } from "@/pages/Swal";
+import { Car } from "@/core/interfaces/car.interface";
+import { carService } from "@/core/services/car.service";
 
 
-export default function RegisterCar({ handleSubmitCallback }) {
+interface RegisterCarProps {
+  handleSubmitCallback: (data: Car) => void;
+}
+
+export const RegisterCar: React.FC<RegisterCarProps> = ({ handleSubmitCallback }) => {
 
   const [errorsFetch, setErrorsFetch] = useState([]);
-  const { register, handleSubmit, watch, formState: { errors } } = useForm();
+  const { register, handleSubmit, formState: { errors } } = useForm<Car>();
 
-
-  const onSubmitForm = async (data) => {
+  const onSubmitForm: SubmitHandler<Car> = async (data: Car) => {
 
     const result = await carService.saveDataCar(data);
-
+   
     if (result.errors) {
       setErrorsFetch(result.errors);
       return;
@@ -25,7 +29,7 @@ export default function RegisterCar({ handleSubmitCallback }) {
 
     successAlert('Se guardaron los datos con Exito.')
     setErrorsFetch([]);
-    handleSubmitCallback(result)
+    handleSubmitCallback(result.car)
   };
 
   return (
@@ -33,7 +37,7 @@ export default function RegisterCar({ handleSubmitCallback }) {
 
       <div className="pt-10">
         {errorsFetch.length > 0 &&
-         <DangerAlert errors={errorsFetch}/>
+          <DangerAlert errors={errorsFetch} />
         }
       </div>
 
@@ -43,8 +47,8 @@ export default function RegisterCar({ handleSubmitCallback }) {
 
           <div className="flex flex-col space-y-1.5">
             <Label htmlFor="text">Numero de Placa</Label>
-            <Input {...register("plateNumber", { required: "Este campo es requerido" })} />
-            {errors.plateNumber && <small className="text-red-600">{errors.plateNumber?.message}</small>}
+            <Input {...register("plate_number", { required: "Este campo es requerido" })} />
+            {errors.plate_number && <small className="text-red-600">{errors.plate_number?.message}</small>}
           </div>
 
           <div className="flex flex-col space-y-1.5">
@@ -55,7 +59,7 @@ export default function RegisterCar({ handleSubmitCallback }) {
 
           <div className="flex flex-col space-y-1.5">
             <Label htmlFor="text">Año:</Label>
-            <Input   {...register("year", { required: "Este campo es requerido" })} />
+            <Input type="number" {...register("year", { required: "Este campo es requerido" })} />
             {errors.year && <small className="text-red-600">{errors.year?.message}</small>}
           </div>
 

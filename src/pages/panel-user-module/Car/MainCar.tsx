@@ -1,19 +1,35 @@
 
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import ListCars from "./ListCars";
-import RegisterCar from "./RegisterCar";
+import { ListCars } from "./ListCars";
+import { RegisterCar } from "./RegisterCar";
 import { FaCarAlt } from "react-icons/fa";
-import { useState } from "react";
+import { useCallback, useMemo, useState } from "react";
+import { Car } from "@/core/interfaces/car.interface";
+import { ActionsTable } from "@/core/interfaces/actionsTable.interface";
 
 
 export default function MainCar() {
 
-  const [dataCar, setDataCar] = useState({});
+  const [dataCar, setDataCar] = useState<Car>({ model: '', year: 0, plate_number: '' });
 
-  const handleSummit = (data: any) => {
-    setDataCar(data.car);
+  const saveData = (data: Car) => {
+    setDataCar(data);
+  };
 
-  }
+  const getData = useCallback((data: Car) => {
+    console.log('Fetching data...', data);
+  }, []);
+  
+  const deleteDate = useCallback((data: Car) => {
+    console.log(`Deleting data for ID: ${data}`);
+  }, []);
+  
+  const listActions = useMemo<ActionsTable[]>(() => [
+    { description: 'Actualizar', callbacks: getData },
+    { description: 'Eliminar', callbacks: deleteDate },
+  ], [deleteDate, getData]);
+
+  console.log('listActions:', listActions);
 
   return (
     <>
@@ -33,7 +49,7 @@ export default function MainCar() {
 
             <CardContent>
 
-              <RegisterCar handleSubmitCallback={handleSummit} />
+              <RegisterCar handleSubmitCallback={saveData} />
 
             </CardContent>
 
@@ -49,7 +65,7 @@ export default function MainCar() {
 
             <CardContent>
 
-              <ListCars dataCar={dataCar}/>
+              <ListCars dataCar={dataCar} actions={listActions}/>
 
             </CardContent>
 
@@ -58,7 +74,6 @@ export default function MainCar() {
 
       </div>
     </>
-  )
+  );
 
 }
-
