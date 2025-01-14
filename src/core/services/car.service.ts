@@ -63,11 +63,13 @@ export const carService = {
         },
       });
 
-      const result: unknown = await response.json();
-
+      const result: any = await response.json();
+      
       return result
 
     } catch (error) {
+
+      console.log('estado de peticion', error)
 
       return error;
     }

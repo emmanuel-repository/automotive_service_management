@@ -45,7 +45,7 @@ function getColumnsAction<T extends RowData>(actions: ActionsTable[]): ColumnDef
 
       return (
         <>
-          <DropdownMenu>
+          <DropdownMenu >
 
             <DropdownMenuTrigger asChild>
               <Button size="lg" variant="ghost" className="h-8 w-8 p-0">
@@ -58,8 +58,8 @@ function getColumnsAction<T extends RowData>(actions: ActionsTable[]): ColumnDef
               <DropdownMenuGroup>
 
                 {
-                  actions.map((item: ActionsTable) => (
-                    <DropdownMenuItem onClick={() => { item.callbacks?.(row.row.original) }}>
+                  actions.map((item: ActionsTable, index: number) => (
+                    <DropdownMenuItem key={`${row.row.original.slug}-${index}`} onClick={() => { item.callbacks?.(row.row.original) }}>
                       <span> {item.description} </span>
                     </DropdownMenuItem>
                   ))

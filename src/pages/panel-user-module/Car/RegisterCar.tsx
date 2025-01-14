@@ -4,7 +4,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { DangerAlert } from "@/components/custom/AlertCustom";
 import { SubmitHandler, useForm } from "react-hook-form";
-import { successAlert } from "@/pages/Swal";
+import { infoAlert, successAlert } from "@/pages/Swal";
 import { Car } from "@/core/interfaces/car.interface";
 import { carService } from "@/core/services/car.service";
 
@@ -21,7 +21,12 @@ export const RegisterCar: React.FC<RegisterCarProps> = ({ handleSubmitCallback }
   const onSubmitForm: SubmitHandler<Car> = async (data: Car) => {
 
     const result = await carService.saveDataCar(data);
-   
+
+    if (result.error) {
+      infoAlert('Error', result.error,);
+      return;
+    }
+
     if (result.errors) {
       setErrorsFetch(result.errors);
       return;

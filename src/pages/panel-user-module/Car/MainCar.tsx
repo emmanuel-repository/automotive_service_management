@@ -11,14 +11,13 @@ import { EditCar } from "./EditCar";
 import { confirmationAlert, infoAlert } from "@/pages/Swal";
 import { carService } from "@/core/services/car.service";
 
-
-
 export default function MainCar() {
 
   const [dataCar, setDataCar] = useState<Car>({ model: '', year: 0, plate_number: '' });
   const [dataCarEdit, setDataCarEdit] = useState<Car>({ model: '', year: 0, plate_number: '' });
   const [openDialog, setOpenDialog] = useState<boolean>(false);
   const [typeAction, setTypeAction] = useState<string>('');
+
 
   const saveData = (data: Car) => {
     setDataCar(data);
@@ -28,7 +27,7 @@ export default function MainCar() {
   const editData = (data: Car) => {
     setDataCar(data);
     setTypeAction('edit');
-  }
+  };
 
   const closeDialog = (open = true) => {
     setOpenDialog(open); // Cerrar el diálogo}
@@ -46,7 +45,7 @@ export default function MainCar() {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     confirmationAlert(message).then(async (result: any) => {
       if (result.isConfirmed) {
-       
+
         const result = await carService.deleteCar(data)
 
         if (result.errors) {
@@ -55,20 +54,19 @@ export default function MainCar() {
         }
 
         setTypeAction('delete');
-
       }
     });
 
   }, []);
 
   const redirectPage = useCallback((data: Car) => {
-    console.log('Actualizacion de los datos', data)
+    console.log('Actualizacion de los datos', data);
   }, [])
 
   const listActions = useMemo<ActionsTable[]>(() => [
     { description: 'Actualizar', callbacks: getData },
     { description: 'Eliminar', callbacks: deleteDate },
-    { description: 'Mostrar Lista de Mantenimientos', callbacks: redirectPage }
+    { description: 'Mantenimientos', callbacks: redirectPage }
   ], [deleteDate, getData, redirectPage]);
 
   return (
@@ -105,7 +103,7 @@ export default function MainCar() {
 
             <CardContent>
 
-              <ListCars dataCar={dataCar} actions={listActions} typeAction={typeAction}/>
+              <ListCars dataCar={dataCar} actions={listActions} typeAction={typeAction} />
 
             </CardContent>
 
@@ -125,10 +123,8 @@ export default function MainCar() {
               </div>
             </DialogTitle>
 
-            <DialogDescription>
-              <div className="flex justify-center text">
-                Editar datos de Vehiculo
-              </div>
+            <DialogDescription className="flex justify-center text-xl">
+              Editar datos de Vehiculo
             </DialogDescription>
 
           </DialogHeader>

@@ -14,7 +14,7 @@ import { ActionsTable } from "@/core/interfaces/actionsTable.interface";
 interface ListCarsProps {
   dataCar: Car;
   actions: ActionsTable[];
-  typeAction: string
+  typeAction: string;
 }
 
 export const ListCars: React.FC<ListCarsProps> = ({ dataCar, actions }) => {
@@ -27,13 +27,13 @@ export const ListCars: React.FC<ListCarsProps> = ({ dataCar, actions }) => {
 
   const { data: fetchedCarList } = useApi(carService.getCars);
 
-  const keysColums: KeysTable[] = [
+  const keysColums = useMemo<KeysTable[]>(() => [
     { keyColumn: 'plate_number', description: 'Numero de Placa' },
     { keyColumn: 'model', description: 'Modelo' },
     { keyColumn: 'year', description: 'Año' },
-  ];
+  ], []);
 
-  const columns = useMemo(() => getColumns(keysColums, actions), []);
+  const columns = useMemo(() => getColumns(keysColums, actions), [actions, keysColums]);
 
   // Actualiza la lista de coches con los datos obtenidos del API
   useEffect(() => {
@@ -44,7 +44,7 @@ export const ListCars: React.FC<ListCarsProps> = ({ dataCar, actions }) => {
   useEffect(() => {
 
     setCarList(prevCarList => {
-     
+
       // Si el coche no existe, agrégalo
       if (dataCar.slug && !prevCarList.some(car => car.slug === dataCar.slug)) {
         return [...prevCarList, { ...dataCar, year: Number(dataCar.year) }];
@@ -54,20 +54,8 @@ export const ListCars: React.FC<ListCarsProps> = ({ dataCar, actions }) => {
 
       return updatedCarList;
     });
-  }, [dataCar]);
 
-  // useEffect(() => {
-  //   if (typeAction === 'delete') {
-  //     // Refetch the data after deleting a car (you could use carService.getCars or any other method)
-  //     const fetchUpdatedData = async () => {
-  //       const result = await carService.getCars();
-  //       if (result && result.cars) {
-  //         setCarList(result.cars);
-  //       }
-  //     };
-  //     fetchUpdatedData();
-  //   }
-  // }, [typeAction]);  // Refetch when 'delete' action happens
+  }, [dataCar]);
 
   const table = useReactTable({
     data: carList,
@@ -94,5 +82,5 @@ export const ListCars: React.FC<ListCarsProps> = ({ dataCar, actions }) => {
       </div>
 
     </>
-  )
+  );
 }

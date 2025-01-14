@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Car } from "@/core/interfaces/car.interface";
 import { DangerAlert } from "@/components/custom/AlertCustom";
 import { carService } from "@/core/services/car.service";
-import { successAlert } from "@/pages/Swal";
+import { infoAlert, successAlert } from "@/pages/Swal";
 
 interface EditCarProps {
   dataCar: Car
@@ -14,7 +14,7 @@ interface EditCarProps {
   handleCloseCallback: (open: boolean) => void;
 }
 
-export const EditCar: React.FC<EditCarProps> = ({ dataCar, handleSubmitCallback, handleCloseCallback}) => {
+export const EditCar: React.FC<EditCarProps> = ({ dataCar, handleSubmitCallback, handleCloseCallback }) => {
 
   const [errorsFetch, setErrorsFetch] = useState([]);
 
@@ -33,6 +33,12 @@ export const EditCar: React.FC<EditCarProps> = ({ dataCar, handleSubmitCallback,
   const onSubmit = async (data: Car) => {
     const result = await carService.editDataCar(data);
 
+    if(result.error) {
+      infoAlert('Error', result.error,);
+      handleCloseCallback(false);
+      return;
+    }
+
     if (result.errors) {
       setErrorsFetch(result.errors);
       return;
@@ -46,12 +52,13 @@ export const EditCar: React.FC<EditCarProps> = ({ dataCar, handleSubmitCallback,
 
   return (
     <>
-      <div className="pt-10">
-        {errorsFetch.length > 0 &&
-          <DangerAlert errors={errorsFetch} />
-        }
-      </div>
 
+      {errorsFetch.length > 0 &&
+        <div className="pt-10">
+          <DangerAlert errors={errorsFetch} />
+        </div>
+      }
+      
       <form onSubmit={handleSubmit(onSubmit)}>
         <div className="grid w-full items-center gap-4">
 
@@ -76,10 +83,11 @@ export const EditCar: React.FC<EditCarProps> = ({ dataCar, handleSubmitCallback,
           <Button type="submit">
             Guardar
           </Button>
-          
+
         </div>
 
       </form>
     </>
-  )
+  );
+  
 }
