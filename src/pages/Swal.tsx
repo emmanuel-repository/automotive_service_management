@@ -5,7 +5,7 @@ const MySwal = withReactContent(Swal);
 
 export const alertLoader = (message?: string): void => {
 
-  let messageExist = message === undefined ? "Cargando, espere un momento." : message;
+  const messageExist = message === undefined ? "Cargando, espere un momento." : message;
   
   MySwal.fire({
     allowOutsideClick: false,

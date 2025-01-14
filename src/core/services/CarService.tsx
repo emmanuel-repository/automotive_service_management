@@ -1,6 +1,6 @@
 const carService = {
 
-  async getCars() {
+  async getCars(): Promise<any> {
 
     try {
       const dataSession = JSON.parse(localStorage.getItem('sessionData') ?? '{}');

@@ -16,26 +16,20 @@ interface UseApiResult<T> {
   refetch: () => Promise<void>;
 }
 
-export function useApi<T>( apiCall: () => Promise<T>, options: UseApiOptions<T> = {} ): UseApiResult<T> {
-  
-  const {
-    onSuccess,
-    onError,
-    initialData,
-    dependencies = [],
-    autoFetch = true
-  } = options;
+export function useApi<T>(apiCall: () => Promise<T>, options: UseApiOptions<T> = {}): UseApiResult<T> {
 
+  const { onSuccess, onError, initialData, dependencies = [], autoFetch = true } = options;
   const [data, setData] = useState<T | undefined>(initialData);
   const [error, setError] = useState<Error | null>(null);
   const [isLoading, setIsLoading] = useState(autoFetch);
 
   const fetchData = useCallback(async () => {
-    
+
     try {
-      
+
       setIsLoading(true);
       setError(null);
+      
       const result = await apiCall();
       setData(result);
       onSuccess?.(result);
@@ -55,9 +49,8 @@ export function useApi<T>( apiCall: () => Promise<T>, options: UseApiOptions<T> 
   }, [apiCall, onSuccess, onError]);
 
   useEffect(() => {
- 
-    if (autoFetch)  fetchData();
 
+    if (autoFetch) fetchData();
 
   }, [...dependencies, autoFetch]);
 

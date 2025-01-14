@@ -1,77 +1,72 @@
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { FaCarAlt } from "react-icons/fa";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
+import { DangerAlert } from "@/components/custom/AlertCustom";
+import { useForm } from "react-hook-form";
+import carService from "@/core/services/CarService";
+import { successAlert } from "@/pages/Swal";
+
 
 export default function RegisterCar({ handleSubmitCallback }) {
 
-  const [formData, setFormData] = useState({ plateNumber: "", model: "", year: "", });
+  const [errorsFetch, setErrorsFetch] = useState([]);
+  const { register, handleSubmit, watch, formState: { errors } } = useForm();
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
 
-    setFormData({ ...formData, [name]: value });
-  };
+  const onSubmitForm = async (data) => {
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    handleSubmitCallback(formData); // Envía los datos al componente padre
-    // setFormData({ plateNumber: "", model: "", year: "" }); // Limpia el formularioç
+    const result = await carService.saveDataCar(data);
+
+    if (result.errors) {
+      setErrorsFetch(result.errors);
+      return;
+    }
+
+    successAlert('Se guardaron los datos con Exito.')
+    setErrorsFetch([]);
+    handleSubmitCallback(result)
   };
 
   return (
     <>
-      <form onSubmit={handleSubmit}>
-        <Card className="w-[400px]">
 
-          <CardHeader>
+      <div className="pt-10">
+        {errorsFetch.length > 0 &&
+         <DangerAlert errors={errorsFetch}/>
+        }
+      </div>
 
-            <CardTitle>
-              <div className="flex justify-center">
-                <FaCarAlt className="size-40" />
-              </div>
-              <div>
-                Servicios Automotriz
-              </div>
-            </CardTitle>
+      <form onSubmit={handleSubmit(onSubmitForm)}>
 
-            <CardDescription>
-              Gestion de Servicios Automotrices.
-            </CardDescription>
+        <div className="grid w-full items-center gap-4">
 
-          </CardHeader>
+          <div className="flex flex-col space-y-1.5">
+            <Label htmlFor="text">Numero de Placa</Label>
+            <Input {...register("plateNumber", { required: "Este campo es requerido" })} />
+            {errors.plateNumber && <small className="text-red-600">{errors.plateNumber?.message}</small>}
+          </div>
 
-          <CardContent>
+          <div className="flex flex-col space-y-1.5">
+            <Label htmlFor="text">Modelo:</Label>
+            <Input {...register("model", { required: "Este campo es requerido" })} />
+            {errors.model && <small className="text-red-600">{errors.model?.message}</small>}
+          </div>
 
-            <div className="grid w-full items-center gap-4">
+          <div className="flex flex-col space-y-1.5">
+            <Label htmlFor="text">Año:</Label>
+            <Input   {...register("year", { required: "Este campo es requerido" })} />
+            {errors.year && <small className="text-red-600">{errors.year?.message}</small>}
+          </div>
 
-              <div className="flex flex-col space-y-1.5">
-                <Label htmlFor="text">Numero de Placa</Label>
-                <Input name="plateNumber" value={formData.plateNumber} onChange={handleChange} required />
-              </div>
-
-              <div className="flex flex-col space-y-1.5">
-                <Label htmlFor="text">Modelo:</Label>
-                <Input name="model" value={formData.model} onChange={handleChange} required />
-              </div>
-
-              <div className="flex flex-col space-y-1.5">
-                <Label htmlFor="text">Año:</Label>
-                <Input name="year" value={formData.year} onChange={handleChange} required />
-              </div>
-
-            </div>
-
-          </CardContent>
-
-          <CardFooter className="flex justify-end">
+          <div className="flex flex-col space-y-1.5">
             <Button type="submit">Guardar</Button>
-          </CardFooter>
-        </Card>
+          </div>
+
+        </div>
 
       </form>
+
     </>
   )
 
