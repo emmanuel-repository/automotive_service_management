@@ -41,7 +41,21 @@ export const ListCars: React.FC<ListCarsProps> = ({ dataCar, actions }) => {
 
   // Actualiza la lista de coches cuando llega un nuevo registro
   useEffect(() => {
-    if (dataCar && dataCar.slug) setCarList(prevCarList => [...prevCarList, { ...dataCar, year: Number(dataCar.year) }]);
+    
+    setCarList(prevCarList => {
+      
+      const updatedCarList = prevCarList.map(car => 
+        car.slug === dataCar.slug ? { ...car, ...dataCar } : car
+      );
+
+      // Si el coche no existe, agrégalo
+      if (!prevCarList.some(car => car.slug === dataCar.slug)) {
+        return [...prevCarList, { ...dataCar, year: Number(dataCar.year) }];
+      }
+
+      return updatedCarList;
+
+    });
   }, [dataCar]);
 
   const table = useReactTable({
