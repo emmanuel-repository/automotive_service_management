@@ -1,22 +1,25 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { useCallback, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, } from "@/components/ui/dialog";
 import { FaCarAlt } from "react-icons/fa";
-import { ListCars } from "./ListCars";
-import { RegisterCar } from "./RegisterCar";
-import { Car } from "@/core/interfaces/car.interface";
-import { ActionsTable } from "@/core/interfaces/actionsTable.interface";
 import { EditCar } from "./EditCar";
 import { confirmationAlert, infoAlert } from "@/pages/Swal";
 import { carService } from "@/core/services/car.service";
 import { useCarStore } from "@/core/stores/car.store";
+import { ListCars } from "./ListCars";
+import { RegisterCar } from "./RegisterCar";
+import { Car } from "@/core/interfaces/car.interface";
+import { ActionsTable } from "@/core/interfaces/actionsTable.interface";
+
 
 export default function MainCar() {
 
   const [openDialog, setOpenDialog] = useState<boolean>(false);
   const { setDataCar, carList, fetchCars } = useCarStore();
+  const navigate = useNavigate();
 
   // Manejar cierre del diálogo
   const closeDialog = useCallback((open = true) => {
@@ -50,8 +53,8 @@ export default function MainCar() {
   }, [carList, fetchCars]);
 
   const handleMaintenance = useCallback((data: Car) => {
-    console.log("Redirigiendo a mantenimientos para:", data);
-  }, []);
+    navigate(`/manager/services/${data.slug}`);
+  }, [navigate]);
 
   const listActions = useMemo<ActionsTable[]>(
     () => [

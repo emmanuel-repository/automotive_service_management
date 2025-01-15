@@ -1,4 +1,7 @@
-const maintenanceService = {
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { Maintenance } from "../interfaces/maintenance.interface";
+
+export const maintenanceService = {
 
   async getMaintenance(slug: string) {
 
@@ -25,7 +28,7 @@ const maintenanceService = {
     }
   },
 
-  async saveMaintenance(data: any): Promise<any> {
+  async saveMaintenance(data: Maintenance): Promise<any> {
     try {
       const dataSession = JSON.parse(localStorage.getItem('sessionData') ?? '{}');
       const response = await fetch(`${import.meta.env.VITE_API}/maintenance_service`, {
@@ -37,7 +40,7 @@ const maintenanceService = {
         },
       });
 
-      const result: any = await response.json();
+      const result: unknown = await response.json();
 
       return result
 
@@ -47,7 +50,7 @@ const maintenanceService = {
     }
   },
 
-  async editMaintenance(data: any): Promise<any> {
+  async editMaintenance(data: Maintenance): Promise<any> {
     try {
       const dataSession = JSON.parse(localStorage.getItem('sessionData') ?? '{}');
       const response = await fetch(`${import.meta.env.VITE_API}/maintenance_service/${data.slug}`, {
@@ -59,7 +62,7 @@ const maintenanceService = {
         },
       });
 
-      const result: any = await response.json();
+      const result: unknown = await response.json();
 
       return result
 
@@ -69,10 +72,10 @@ const maintenanceService = {
     }
   },
 
-  async deleteMaintenance(slug: string): Promise<any> {
+  async deleteMaintenance(data: Maintenance): Promise<any> {
     try {
       const dataSession = JSON.parse(localStorage.getItem('sessionData') ?? '{}');
-      const response = await fetch(`${import.meta.env.VITE_API}/maintenance_service/${slug}`, {
+      const response = await fetch(`${import.meta.env.VITE_API}/maintenance_service/${data.slug}`, {
         method: 'DELETE',
         headers: {
           "Content-Type": "application/json",
@@ -80,7 +83,7 @@ const maintenanceService = {
         },
       });
 
-      const result: any = await response.json();
+      const result: unknown = await response.json();
 
       return result
 
@@ -89,6 +92,5 @@ const maintenanceService = {
       return error;
     }
   },
-}
 
-export default maintenanceService;
+}

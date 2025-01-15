@@ -30,19 +30,19 @@ export const ListCars: React.FC<ListCarsProps> = ({ actions }) => {
 
   // Si la API devuelve los datos, actualiza el estado de Zustand
   useEffect(() => {
-    
     if (fetchedCarList && fetchedCarList.cars) {
       fetchCars(fetchedCarList.cars); // Actualiza el estado con los datos obtenidos
     } else if (error) {
       fetchCars([]); // En caso de error, asegúrate de pasar un arreglo vacío
     }
-
   }, [fetchedCarList, error, fetchCars]);
 
+  //Si se efectua algun cambio cuando se agregue o actualiza un registro.
   useEffect(() => {
     if (dataCar.slug) addOrUpdateCar(dataCar);
   }, [dataCar, addOrUpdateCar]);
 
+  //Configuracion de la tabla.
   const table = useReactTable({
     data: carList,
     columns,
@@ -61,7 +61,6 @@ export const ListCars: React.FC<ListCarsProps> = ({ actions }) => {
       <div className="pt-8">
         <PaginationTableCustom table={table} />
       </div>
-      {/* <pre>{JSON.stringify(carList, null, 2)}</pre> */}
     </>
   );
 

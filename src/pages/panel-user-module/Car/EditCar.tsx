@@ -15,12 +15,17 @@ interface EditCarProps {
 
 export const EditCar: React.FC<EditCarProps> = ({ handleCloseCallback }) => {
 
-  const { dataCar, addOrUpdateCar,  } = useCarStore();
   const [errorsFetch, setErrorsFetch] = useState([]);
+  const { dataCar, addOrUpdateCar, } = useCarStore();
 
   // Si dataCar contiene estos valores
   const { register, handleSubmit, formState: { errors }, setValue } = useForm<Car>({
-    defaultValues: { plate_number: dataCar.plate_number, model: dataCar.model, year: dataCar.year, slug: dataCar.slug },
+    defaultValues: {
+      plate_number: dataCar.plate_number,
+      model: dataCar.model,
+      year: dataCar.year,
+      slug: dataCar.slug
+    },
   });
 
   // Si dataCar cambia, puedes setear los valores manualmente
@@ -60,6 +65,7 @@ export const EditCar: React.FC<EditCarProps> = ({ handleCloseCallback }) => {
       }
 
       <form onSubmit={handleSubmit(onSubmit)}>
+        
         <div className="grid w-full items-center gap-4">
 
           <div className="flex flex-col space-y-1.5">

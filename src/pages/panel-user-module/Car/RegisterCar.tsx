@@ -37,12 +37,11 @@ export const RegisterCar: React.FC = () => {
 
   return (
     <>
-
-      <div className="pt-10">
-        {errorsFetch.length > 0 &&
+      {errorsFetch.length > 0 &&
+        <div className="pt-10">
           <DangerAlert errors={errorsFetch} />
-        }
-      </div>
+        </div>
+      }
 
       <form onSubmit={handleSubmit(onSubmitForm)}>
 

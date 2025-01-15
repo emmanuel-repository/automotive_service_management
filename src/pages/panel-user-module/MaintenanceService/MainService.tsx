@@ -1,255 +1,121 @@
-import { Button } from "@/components/ui/button";
-import { Table } from "@/components/ui/table"
-import { useEffect, useState } from "react";
-import { TableHeaderCustom } from "@/components/custom/TableHeaderCustom";
-import { TableBodyCustom } from "@/components/custom/TableBodyCustom";
-import { getCoreRowModel, getFilteredRowModel, getPaginationRowModel, getSortedRowModel, useReactTable } from "@tanstack/react-table";
+import { useCallback, useMemo, useState } from "react";
+import { useParams } from "react-router-dom";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { PaginationTableCustom } from "@/components/custom/PaginationTableCustom";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { AlertCircle } from "lucide-react";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuTrigger, } from "@/components/ui/dropdown-menu";
-import { MoreHorizontal } from "lucide-react";
-import { successAlert, infoAlert } from "@/pages/Swal";
-import maintenanceService from "@/core/services/maintenance.service";
-import MaintenanceRegister from "./MaintenanceRegister";
-import { useParams } from 'react-router-dom';
-import { MaintenanceEdit } from "./MaintenanceEdit";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, } from "@/components/ui/dialog";
+import { FaCarAlt } from "react-icons/fa";
+import { Maintenance } from "@/core/interfaces/maintenance.interface";
+import { useMaintenancesStore } from "@/core/stores/maintenance.store";
+import { confirmationAlert, infoAlert } from "@/pages/Swal";
+import { maintenanceService } from "@/core/services/maintenance.service";
+import { ActionsTable } from "@/core/interfaces/actionsTable.interface";
+import { ListMaintenance } from "./ListMaintenance";
+import { RegisterMaintenance } from "./RegisterMaintenance";
+import { EditMaintenance } from "./EditMaintenance";
 
 
 export default function MainService() {
 
-  const [sorting, setSorting] = useState([]);
-  const [columnFilters, setColumnFilters] = useState([]);
-  const [columnVisibility, setColumnVisibility] = useState({});
-  const [rowSelection, setRowSelection] = useState({});
-  const [columns, setDataColumns] = useState([]);
-  const [data, setDataService] = useState([]);
-  const [errors, setErrors] = useState([]);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [formEdit, setFormEdit] = useState({ plate_number: "", model: "", year: "", });
+  const [openDialog, setOpenDialog] = useState<boolean>(false);
+  const { setDataMaintenance, maintenanceList, fetchMaintenance } = useMaintenancesStore();
   const { id } = useParams();
 
-  useEffect(() => {
-
-    const getDataRecord = async () => {
-
-      const dataColumns = getColumns(handleEdit, handleDelete);
-      const dataResult = await maintenanceService.getMaintenance(id);
-
-      setDataColumns(dataColumns)
-      setDataService(dataResult.maintenance_services);
-    }
-
-    getDataRecord();
+  // Manejar cierre del diálogo
+  const closeDialog = useCallback((open = true) => {
+    setOpenDialog(open);
   }, []);
 
-  const table = useReactTable({
-    data,
-    columns,
-    onSortingChange: setSorting,
-    onColumnFiltersChange: setColumnFilters,
-    getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    onColumnVisibilityChange: setColumnVisibility,
-    onRowSelectionChange: setRowSelection,
-    state: { sorting, columnFilters, columnVisibility, rowSelection },
-  });
+  //Manejador para abrir el modal para actualizar los datos de 
+  const handleUpdate = useCallback((data: Maintenance) => {
+    setDataMaintenance(data); // Actualizar en el estado global
+    setOpenDialog(true); // Abrir el diálogo para edición
+  }, [setDataMaintenance]);
 
-  const closeDialog = () => {
-    setIsDialogOpen(false); // Cerrar el diálogo}
-  };
+  const handleDelete = useCallback(async (data: Maintenance) => {
 
-  const handleFormSubmit = async (data) => {
-    data["slugCar"] = id
+    const message = "Se borrará el registro seleccionado, ¡No se podrá revertir!";
 
-    const result = await maintenanceService.saveMaintenance(data)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    confirmationAlert(message).then(async (result: any) => {
+      if (result.isConfirmed) {
 
-    if (result.errors) {
-      setErrors(result.errors)
-      return
-    }
+        const result = await maintenanceService.deleteMaintenance(data)
 
-    setDataService((prevData) => [...prevData, result.maintenance_service]);
-    setErrors([])
-    successAlert("Si se guardaron los dato")
-  };
+        if (result.errors) {
+          infoAlert("¡Verifica!", "No se pudo eliminar el registro.");
+        } else {
+          // Eliminar del estado global
+          fetchMaintenance(maintenanceList.filter((service: Maintenance) => service.slug !== data.slug));
+        }
 
-  const handleSubmitEdit = async () => {
+      }
+    });
+  }, [maintenanceList, fetchMaintenance]);
 
-    console.log(formEdit.slug)
-
-    const result = await maintenanceService.editMaintenance(formEdit)
-
-    if (result.errors) {
-      // setErrorsEdit(result.errors)
-      infoAlert(JSON.stringify(result.errors), "¡Verificar!");
-      setIsDialogOpen(false);
-      return
-    }
-
-    setDataService((prevData) =>
-      prevData.map((record) =>
-        record.slug === result.maintenance_service.slug ? { ...record, ...result.maintenance_service } : record
-      )
-    );
-    setIsDialogOpen(false);
-
-  };
-
-  const handleFormChange = (newFormData) => {
-    setFormEdit(newFormData);
-  };
-
-  const handleEdit = (data) => {
-
-    const formattedDate = new Date(data.date).toISOString().split('T')[0];
-
-    data.date = formattedDate
-
-    setIsDialogOpen(true);
-    setFormEdit(data)
-  }
-
-  const handleDelete = async (data) => {
-    const result = await maintenanceService.deleteMaintenance(data.slug)
-
-    if (result.errors) {
-      setErrors(result.errors)
-      return
-    }
-
-    setDataService((prevData) => prevData.filter(item => item.slug !== data.slug));
-  }
+  const listActions = useMemo<ActionsTable[]>(
+    () => [
+      { description: "Actualizar", callbacks: handleUpdate },
+      { description: "Eliminar", callbacks: handleDelete },
+    ],
+    [handleUpdate, handleDelete]
+  );
 
   return (
     <>
-
-      <div className="pt-10">
-        {errors.length > 0 &&
-          <Alert variant="destructive">
-            <AlertCircle className="h-4 w-4" />
-            <AlertTitle>Error</AlertTitle>
-            <AlertDescription>
-              <ul>
-                {errors.map((item) => (
-                  <li>{item}</li>
-                ))}
-              </ul>
-            </AlertDescription>
-          </Alert>
-        }
-      </div>
-
       <div className="flex flex-row">
 
-        <div className="pt-10">
-          <MaintenanceRegister handleSubmitCallback={handleFormSubmit} />
+        <div className="pt-10 flex-grow">
+          <Card>
+
+            <CardHeader>
+              <div className="flex justify-center">
+                <FaCarAlt className="size-40" />
+              </div>
+              <div>Servicios Automotriz</div>
+            </CardHeader>
+
+            <CardContent>
+              {/* Registro de cochesç */}
+              <RegisterMaintenance slugCar={id}/>
+            </CardContent>
+
+          </Card>
         </div>
 
         <div className="pt-10 ml-4 flex-grow">
-          <Card >
-            <CardHeader>
+          <Card className="w-auto">
+            <CardHeader>Listado de Mantenimientos.</CardHeader>
 
-            </CardHeader>
             <CardContent>
-              <Table>
-                <TableHeaderCustom table={table} />
-                <TableBodyCustom table={table} columns={columns} />
-              </Table>
-
-              <div className="pt-8">
-                <PaginationTableCustom table={table} />
-              </div>
-
+              {/* Tabla con listado de Mantenimientos*/}
+              <ListMaintenance actions={listActions} slugMaintenance={id} />
             </CardContent>
+
           </Card>
         </div>
 
       </div>
 
-      <MaintenanceEdit
-        open={isDialogOpen}
-        onClose={closeDialog}
-        data={formEdit} // Datos seleccionados para edición
-        onChange={handleFormChange} // Actualiza el estado del formulario
-        onSubmit={handleSubmitEdit} // Maneja el envío del formulario
-      />
+      {/* Diálogo para editar los datos de mantenimientos. */}
+      <Dialog open={openDialog} onOpenChange={closeDialog}>
+        <DialogContent>
 
+          <DialogHeader>
+
+            <DialogTitle>
+              <div className="flex justify-center">
+                <FaCarAlt className="size-40" />
+              </div>
+            </DialogTitle>
+
+            <DialogDescription className="flex justify-center text-xl">
+              Editar datos de Vehículo
+            </DialogDescription>
+          </DialogHeader>
+
+          <EditMaintenance handleCloseCallback={closeDialog}/>
+
+        </DialogContent>
+      </Dialog>
     </>
   )
-}
-
-function getColumns(handleEdit, handleDelete) {
-
-  const keysColums = [
-    { keyColumn: 'description', description: 'Descripcion' },
-    { keyColumn: 'date', description: 'Fecha' },
-    { keyColumn: 'status', description: 'Estatus' },
-  ];
-
-  const columns = keysColums.map((item) => {
-    return {
-      accessorKey: item.keyColumn,
-      header: ({ column }) => {
-
-        return (
-          <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")} 	>
-            {item.description}
-          </Button>
-        )
-
-      },
-      cell: ({ row }) => <div className="uppercase" > {row.getValue(item.keyColumn)} </div>,
-    };
-  });
-
-  columns.push(getColumnsAction(handleEdit, handleDelete))
-
-  return columns;
-}
-
-function getColumnsAction(handleEdit, handleDelete) {
-
-  return {
-    id: "actions",
-    enableHiding: false,
-    header: 'Acciones',
-    cell: ({ row }) => {
-
-      return (
-        <>
-          <DropdownMenu>
-
-            <DropdownMenuTrigger asChild>
-              <Button size="lg" variant="ghost" className="h-8 w-8 p-0">
-                <MoreHorizontal className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-
-            <DropdownMenuContent className="w-56">
-
-              <DropdownMenuGroup>
-
-                <DropdownMenuItem onClick={() => { handleEdit(row.original) }}>
-                  <span>Actualizar</span>
-                </DropdownMenuItem>
-
-                <DropdownMenuItem onClick={() => { handleDelete(row.original) }}>
-                  <span>Eliminar</span>
-                </DropdownMenuItem>
-
-              </DropdownMenuGroup>
-
-            </DropdownMenuContent>
-
-          </DropdownMenu >
-
-        </>
-      )
-    }
-  };
-
 }

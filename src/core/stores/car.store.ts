@@ -1,12 +1,6 @@
 
 import { create } from 'zustand';
-
-interface Car {
-  model: string;
-  year: number;
-  plate_number: string;
-  slug?: string;
-}
+import { Car } from '../interfaces/car.interface';
 
 interface CarStore {
   carList: Car[];
@@ -23,10 +17,7 @@ export const useCarStore = create<CarStore>((set) => ({
   // Cargar la lista de autos desde una fuente externa
   fetchCars: (cars) => set({ carList: cars }),
 
-  setDataCar: (car: Car) => set({ dataCar: car }),
-
   // Agregar o actualizar un coche
-
   addOrUpdateCar: (car) =>
     set((state) => {
       // Verifica que carList exista antes de hacer el 'some'
@@ -39,5 +30,5 @@ export const useCarStore = create<CarStore>((set) => ({
       };
     }),
 
-    
+  setDataCar: (car) => set({ dataCar: car }),
 }))
