@@ -14,10 +14,9 @@ import { ActionsTable } from "@/core/interfaces/actionsTable.interface";
 interface ListCarsProps {
   dataCar: Car;
   actions: ActionsTable[];
-  typeAction: string;
 }
 
-export const ListCars: React.FC<ListCarsProps> = ({ dataCar, actions }) => {
+export const ListCars: React.FC<ListCarsProps> = ({ dataCar, actions}) => {
 
   const [sorting] = useState([]);
   const [columnFilters] = useState([]);
@@ -57,6 +56,7 @@ export const ListCars: React.FC<ListCarsProps> = ({ dataCar, actions }) => {
 
   }, [dataCar]);
 
+ 
   const table = useReactTable({
     data: carList,
     columns,
@@ -80,7 +80,8 @@ export const ListCars: React.FC<ListCarsProps> = ({ dataCar, actions }) => {
       <div className="pt-8">
         <PaginationTableCustom table={table} />
       </div>
-
+      
+      <pre>{JSON.stringify(carList, null, 2)}</pre>
     </>
   );
 }

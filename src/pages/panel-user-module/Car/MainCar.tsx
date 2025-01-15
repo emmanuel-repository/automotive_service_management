@@ -16,17 +16,13 @@ export default function MainCar() {
   const [dataCar, setDataCar] = useState<Car>({ model: '', year: 0, plate_number: '' });
   const [dataCarEdit, setDataCarEdit] = useState<Car>({ model: '', year: 0, plate_number: '' });
   const [openDialog, setOpenDialog] = useState<boolean>(false);
-  const [typeAction, setTypeAction] = useState<string>('');
-
 
   const saveData = (data: Car) => {
     setDataCar(data);
-    setTypeAction('save');
   };
 
   const editData = (data: Car) => {
     setDataCar(data);
-    setTypeAction('edit');
   };
 
   const closeDialog = (open = true) => {
@@ -52,8 +48,6 @@ export default function MainCar() {
           infoAlert('¡Verifica!', 'No se pudo eliminar el registro.');
           return
         }
-
-        setTypeAction('delete');
       }
     });
 
@@ -103,7 +97,7 @@ export default function MainCar() {
 
             <CardContent>
 
-              <ListCars dataCar={dataCar} actions={listActions} typeAction={typeAction} />
+              <ListCars dataCar={dataCar} actions={listActions}/>
 
             </CardContent>
 
