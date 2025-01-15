@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo } from "react";
 import { getColumns } from "@/lib/tables.configs";
 import { Table } from "@/components/ui/table";
 import { getCoreRowModel, getFilteredRowModel, getPaginationRowModel, getSortedRowModel, useReactTable } from "@tanstack/react-table";
@@ -6,57 +6,43 @@ import { carService } from "@/core/services/car.service";
 import { TableHeaderCustom } from "@/components/custom/TableHeaderCustom";
 import { TableBodyCustom } from "@/components/custom/TableBodyCustom";
 import { PaginationTableCustom } from "@/components/custom/PaginationTableCustom";
-import { Car } from "@/core/interfaces/car.interface";
-import { useApi } from "@/hooks/useApi";
 import { KeysTable } from "@/core/interfaces/keysTable.interface";
 import { ActionsTable } from "@/core/interfaces/actionsTable.interface";
+import { useCarStore } from "@/core/stores/car.store";
+import { useApi } from "@/hooks/useApi";
 
 interface ListCarsProps {
-  dataCar: Car;
   actions: ActionsTable[];
 }
 
-export const ListCars: React.FC<ListCarsProps> = ({ dataCar, actions}) => {
+export const ListCars: React.FC<ListCarsProps> = ({ actions }) => {
 
-  const [sorting] = useState([]);
-  const [columnFilters] = useState([]);
-  const [columnVisibility, setColumnVisibility] = useState({});
-  const [rowSelection, setRowSelection] = useState({});
-  const [carList, setCarList] = useState<Car[]>([]);  // Añadir estado para los coches
+  const { carList, dataCar, fetchCars, addOrUpdateCar } = useCarStore();
+  const { data: fetchedCarList, error } = useApi(carService.getCars);
 
-  const { data: fetchedCarList } = useApi(carService.getCars);
-
-  const keysColums = useMemo<KeysTable[]>(() => [
-    { keyColumn: 'plate_number', description: 'Numero de Placa' },
-    { keyColumn: 'model', description: 'Modelo' },
-    { keyColumn: 'year', description: 'Año' },
+  const keysColumns = useMemo<KeysTable[]>(() => [
+    { keyColumn: "plate_number", description: "Numero de Placa" },
+    { keyColumn: "model", description: "Modelo" },
+    { keyColumn: "year", description: "Año" },
   ], []);
 
-  const columns = useMemo(() => getColumns(keysColums, actions), [actions, keysColums]);
+  const columns = useMemo(() => getColumns(keysColumns, actions), [actions, keysColumns]);
 
-  // Actualiza la lista de coches con los datos obtenidos del API
+  // Si la API devuelve los datos, actualiza el estado de Zustand
   useEffect(() => {
-    if (fetchedCarList && fetchedCarList.cars) setCarList(fetchedCarList.cars);
-  }, [fetchedCarList]);
+    
+    if (fetchedCarList && fetchedCarList.cars) {
+      fetchCars(fetchedCarList.cars); // Actualiza el estado con los datos obtenidos
+    } else if (error) {
+      fetchCars([]); // En caso de error, asegúrate de pasar un arreglo vacío
+    }
 
-  // Actualiza la lista de coches cuando llega un nuevo registro
+  }, [fetchedCarList, error, fetchCars]);
+
   useEffect(() => {
+    if (dataCar.slug) addOrUpdateCar(dataCar);
+  }, [dataCar, addOrUpdateCar]);
 
-    setCarList(prevCarList => {
-
-      // Si el coche no existe, agrégalo
-      if (dataCar.slug && !prevCarList.some(car => car.slug === dataCar.slug)) {
-        return [...prevCarList, { ...dataCar, year: Number(dataCar.year) }];
-      }
-
-      const updatedCarList = prevCarList.map((car: Car) => car.slug === dataCar.slug ? { ...car, ...dataCar } : car);
-
-      return updatedCarList;
-    });
-
-  }, [dataCar]);
-
- 
   const table = useReactTable({
     data: carList,
     columns,
@@ -64,24 +50,19 @@ export const ListCars: React.FC<ListCarsProps> = ({ dataCar, actions}) => {
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
-    onColumnVisibilityChange: setColumnVisibility,
-    onRowSelectionChange: setRowSelection,
-    state: { sorting, columnFilters, columnVisibility, rowSelection },
   });
 
   return (
     <>
-
       <Table>
         <TableHeaderCustom table={table} />
         <TableBodyCustom table={table} columns={columns} />
       </Table>
-
       <div className="pt-8">
         <PaginationTableCustom table={table} />
       </div>
-      
-      <pre>{JSON.stringify(carList, null, 2)}</pre>
+      {/* <pre>{JSON.stringify(carList, null, 2)}</pre> */}
     </>
   );
+
 }

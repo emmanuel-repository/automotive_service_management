@@ -7,15 +7,15 @@ import { Car } from "@/core/interfaces/car.interface";
 import { DangerAlert } from "@/components/custom/AlertCustom";
 import { carService } from "@/core/services/car.service";
 import { infoAlert, successAlert } from "@/pages/Swal";
+import { useCarStore } from "@/core/stores/car.store";
 
 interface EditCarProps {
-  dataCar: Car
-  handleSubmitCallback: (data: Car) => void;
   handleCloseCallback: (open: boolean) => void;
 }
 
-export const EditCar: React.FC<EditCarProps> = ({ dataCar, handleSubmitCallback, handleCloseCallback }) => {
+export const EditCar: React.FC<EditCarProps> = ({ handleCloseCallback }) => {
 
+  const { dataCar, addOrUpdateCar,  } = useCarStore();
   const [errorsFetch, setErrorsFetch] = useState([]);
 
   // Si dataCar contiene estos valores
@@ -33,7 +33,7 @@ export const EditCar: React.FC<EditCarProps> = ({ dataCar, handleSubmitCallback,
   const onSubmit = async (data: Car) => {
     const result = await carService.editDataCar(data);
 
-    if(result.error) {
+    if (result.error) {
       infoAlert('Error', result.error,);
       handleCloseCallback(false);
       return;
@@ -47,7 +47,7 @@ export const EditCar: React.FC<EditCarProps> = ({ dataCar, handleSubmitCallback,
     handleCloseCallback(false);
     successAlert('Se actualizaron los datos con Exito.');
     setErrorsFetch([]);
-    handleSubmitCallback(result.car);
+    addOrUpdateCar(result.car);
   };
 
   return (
@@ -58,7 +58,7 @@ export const EditCar: React.FC<EditCarProps> = ({ dataCar, handleSubmitCallback,
           <DangerAlert errors={errorsFetch} />
         </div>
       }
-      
+
       <form onSubmit={handleSubmit(onSubmit)}>
         <div className="grid w-full items-center gap-4">
 
@@ -89,5 +89,5 @@ export const EditCar: React.FC<EditCarProps> = ({ dataCar, handleSubmitCallback,
       </form>
     </>
   );
-  
+
 }

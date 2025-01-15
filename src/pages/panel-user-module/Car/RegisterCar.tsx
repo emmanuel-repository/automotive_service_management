@@ -7,14 +7,12 @@ import { SubmitHandler, useForm } from "react-hook-form";
 import { infoAlert, successAlert } from "@/pages/Swal";
 import { Car } from "@/core/interfaces/car.interface";
 import { carService } from "@/core/services/car.service";
+import { useCarStore } from "@/core/stores/car.store";
 
 
-interface RegisterCarProps {
-  handleSubmitCallback: (data: Car) => void;
-}
+export const RegisterCar: React.FC = () => {
 
-export const RegisterCar: React.FC<RegisterCarProps> = ({ handleSubmitCallback }) => {
-
+  const { addOrUpdateCar } = useCarStore();
   const [errorsFetch, setErrorsFetch] = useState([]);
   const { register, handleSubmit, formState: { errors } } = useForm<Car>();
 
@@ -34,7 +32,7 @@ export const RegisterCar: React.FC<RegisterCarProps> = ({ handleSubmitCallback }
 
     successAlert('Se guardaron los datos con Exito.')
     setErrorsFetch([]);
-    handleSubmitCallback(result.car)
+    addOrUpdateCar(result.car)
   };
 
   return (

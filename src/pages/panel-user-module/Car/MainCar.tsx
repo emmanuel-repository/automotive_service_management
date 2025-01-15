@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { useCallback, useMemo, useState } from "react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -10,58 +11,56 @@ import { ActionsTable } from "@/core/interfaces/actionsTable.interface";
 import { EditCar } from "./EditCar";
 import { confirmationAlert, infoAlert } from "@/pages/Swal";
 import { carService } from "@/core/services/car.service";
+import { useCarStore } from "@/core/stores/car.store";
 
 export default function MainCar() {
 
-  const [dataCar, setDataCar] = useState<Car>({ model: '', year: 0, plate_number: '' });
-  const [dataCarEdit, setDataCarEdit] = useState<Car>({ model: '', year: 0, plate_number: '' });
   const [openDialog, setOpenDialog] = useState<boolean>(false);
+  const { setDataCar, carList, fetchCars } = useCarStore();
 
-  const saveData = (data: Car) => {
-    setDataCar(data);
-  };
-
-  const editData = (data: Car) => {
-    setDataCar(data);
-  };
-
-  const closeDialog = (open = true) => {
-    setOpenDialog(open); // Cerrar el diálogo}
-  };
-
-  const getData = useCallback((data: Car) => {
-    setDataCarEdit(data)
-    setOpenDialog(true);
+  // Manejar cierre del diálogo
+  const closeDialog = useCallback((open = true) => {
+    setOpenDialog(open);
   }, []);
 
-  const deleteDate = useCallback(async (data: Car) => {
+  //Manejador para abrir el modal para actualizar los datos de 
+  const handleUpdate = useCallback((data: Car) => {
+    setDataCar(data); // Actualizar en el estado global
+    setOpenDialog(true); // Abrir el diálogo para edición
+  }, [setDataCar]);
 
-    const message: string = 'Se borrara el registro seleccionado, ¡No se podra revertir!'
+  const handleDelete = useCallback(async (data: Car) => {
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const message = "Se borrará el registro seleccionado, ¡No se podrá revertir!";
+
     confirmationAlert(message).then(async (result: any) => {
       if (result.isConfirmed) {
 
-        const result = await carService.deleteCar(data)
+        const result = await carService.deleteCar(data);
 
         if (result.errors) {
-          infoAlert('¡Verifica!', 'No se pudo eliminar el registro.');
-          return
+          infoAlert("¡Verifica!", "No se pudo eliminar el registro.");
+        } else {
+          // Eliminar del estado global
+          fetchCars(carList.filter((car: Car) => car.slug !== data.slug));
         }
+
       }
     });
+  }, [carList, fetchCars]);
 
+  const handleMaintenance = useCallback((data: Car) => {
+    console.log("Redirigiendo a mantenimientos para:", data);
   }, []);
 
-  const redirectPage = useCallback((data: Car) => {
-    console.log('Actualizacion de los datos', data);
-  }, [])
-
-  const listActions = useMemo<ActionsTable[]>(() => [
-    { description: 'Actualizar', callbacks: getData },
-    { description: 'Eliminar', callbacks: deleteDate },
-    { description: 'Mantenimientos', callbacks: redirectPage }
-  ], [deleteDate, getData, redirectPage]);
+  const listActions = useMemo<ActionsTable[]>(
+    () => [
+      { description: "Actualizar", callbacks: handleUpdate },
+      { description: "Eliminar", callbacks: handleDelete },
+      { description: "Mantenimientos", callbacks: handleMaintenance },
+    ],
+    [handleUpdate, handleDelete, handleMaintenance]
+  );
 
   return (
     <>
@@ -74,15 +73,12 @@ export default function MainCar() {
               <div className="flex justify-center">
                 <FaCarAlt className="size-40" />
               </div>
-              <div>
-                Servicios Automotriz
-              </div>
+              <div>Servicios Automotriz</div>
             </CardHeader>
 
             <CardContent>
-
-              <RegisterCar handleSubmitCallback={saveData} />
-
+              {/* Registro de cochesç */}
+              <RegisterCar />
             </CardContent>
 
           </Card>
@@ -90,15 +86,11 @@ export default function MainCar() {
 
         <div className="pt-10 ml-4 flex-grow">
           <Card className="w-auto">
-
-            <CardHeader>
-              Listado de Automoviles
-            </CardHeader>
+            <CardHeader>Listado de Automóviles</CardHeader>
 
             <CardContent>
-
-              <ListCars dataCar={dataCar} actions={listActions}/>
-
+              {/* Tabla con listado de coches */}
+              <ListCars actions={listActions} />
             </CardContent>
 
           </Card>
@@ -106,28 +98,24 @@ export default function MainCar() {
 
       </div>
 
-      <Dialog open={openDialog} onOpenChange={closeDialog} >
+      {/* Diálogo para editar coches */}
+      <Dialog open={openDialog} onOpenChange={closeDialog}>
         <DialogContent>
-
-          <DialogHeader >
-
+          <DialogHeader>
             <DialogTitle>
               <div className="flex justify-center">
                 <FaCarAlt className="size-40" />
               </div>
             </DialogTitle>
-
             <DialogDescription className="flex justify-center text-xl">
-              Editar datos de Vehiculo
+              Editar datos de Vehículo
             </DialogDescription>
-
           </DialogHeader>
 
-          <EditCar dataCar={dataCarEdit} handleSubmitCallback={editData} handleCloseCallback={closeDialog} />
+          <EditCar handleCloseCallback={closeDialog} />
 
         </DialogContent>
       </Dialog>
-
     </>
   );
 
