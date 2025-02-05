@@ -43,11 +43,18 @@ export const carService = {
 
       const result: unknown = await response.json();
 
+      if (!response.ok) {
+        throw new Error(JSON.stringify(result)); // Guardamos los errores en el mensaje del error
+      }
+
       return result
 
     } catch (error) {
 
-      return error;
+      if (error instanceof Error) {
+        throw new Error(error.message); // Reenviamos el error
+      }
+      throw new Error("Error desconocido");
     }
   },
 
@@ -64,7 +71,7 @@ export const carService = {
       });
 
       const result: any = await response.json();
-      
+
       return result
 
     } catch (error) {
@@ -95,6 +102,6 @@ export const carService = {
       return error;
     }
   },
-  
+
 }
 

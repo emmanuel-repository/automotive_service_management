@@ -8,32 +8,50 @@ import { infoAlert, successAlert } from "@/pages/Swal";
 import { Car } from "@/core/interfaces/car.interface";
 import { carService } from "@/core/services/car.service";
 import { useCarStore } from "@/core/stores/car.store";
+import { useApi } from "@/hooks/useApi";
 
 
 export const RegisterCar: React.FC = () => {
 
   const { addOrUpdateCar } = useCarStore();
   const [errorsFetch, setErrorsFetch] = useState([]);
-  const { register, handleSubmit, formState: { errors } } = useForm<Car>();
+  const { register, handleSubmit, getValues, formState: { errors } } = useForm<Car>();
 
-  const onSubmitForm: SubmitHandler<Car> = async (data: Car) => {
+  const { refetch } = useApi(
 
-    const result = await carService.saveDataCar(data);
+    () => {
+      const formData = getValues();
+      return carService.saveDataCar(formData);
+    },
 
-    if (result.error) {
-      infoAlert('Error', result.error,);
-      return;
+    {
+      onSuccess: (data) => {
+
+        successAlert('Se guardaron los datos con Exito.')
+        setErrorsFetch([]);
+        addOrUpdateCar(data.car)
+
+      },
+
+      onError: (error) => {
+        const parsedError = JSON.parse(error.message);
+
+        if (parsedError.error) {
+          infoAlert('Error', parsedError.error,);
+          return;
+        }
+
+        if (parsedError.errors) {
+          setErrorsFetch(parsedError.errors);
+          return;
+        }
+      },
+
+      autoFetch: false, // No queremos que se ejecute automáticamente
     }
+  );
 
-    if (result.errors) {
-      setErrorsFetch(result.errors);
-      return;
-    }
-
-    successAlert('Se guardaron los datos con Exito.')
-    setErrorsFetch([]);
-    addOrUpdateCar(result.car)
-  };
+  const onSubmitForm: SubmitHandler<Car> = async () => refetch();
 
   return (
     <>
